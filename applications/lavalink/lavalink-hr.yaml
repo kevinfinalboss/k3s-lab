@@ -34,6 +34,16 @@ spec:
         persistence:
           enabled: false
         
+        externalSecrets:
+          enabled: true
+          mountAsEnv: true
+          mountAsFile: false
+          parameters:
+            - key: lavalink-password
+              path: /lavalink/password
+            - key: youtube-refresh-token
+              path: /lavalink/youtube-refresh-token
+        
         initContainers:
           - name: config-init
             image: busybox
@@ -42,9 +52,15 @@ spec:
               - -c
               - |
                 cp /configmap/application.yml /config/application.yml
+                sed -i "s|\${LAVALINK_PASSWORD}|$lavalink_password|g" /config/application.yml
+                sed -i "s|\${YOUTUBE_REFRESH_TOKEN}|$youtube_refresh_token|g" /config/application.yml
                 echo "===== Configuração do Lavalink Atualizada ====="
-                cat /config/application.yml | head -20
+                echo "Password configurado: $(echo $lavalink_password | cut -c1-5)***"
+                echo "Refresh token configurado: $(echo $youtube_refresh_token | cut -c1-10)***"
                 echo "=============================================="
+            envFrom:
+              - secretRef:
+                  name: lavalink-secrets
             volumeMounts:
               - name: config-volume
                 mountPath: /configmap
