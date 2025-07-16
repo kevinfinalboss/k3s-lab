@@ -1,51 +1,85 @@
 apiVersion: v1
-kind: Service
-metadata:
-  name: wings-service
-  namespace: default
-spec:
-  type: ClusterIP
-  ports:
-  - port: 8080
-    targetPort: 8080
-    protocol: TCP
----
-apiVersion: v1
 kind: Endpoints
 metadata:
-  name: wings-service
-  namespace: default
+  name: wings-api-external
+  namespace: wings
 subsets:
 - addresses:
   - ip: 69.62.95.160
   ports:
   - port: 8080
+    name: wings-api
+  - port: 2022
+    name: wings-sftp
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wings-api-external
+  namespace: wings
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: wings-api
+  - port: 2022
+    targetPort: 2022
+    name: wings-sftp
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wings-sftp-external
+  namespace: wings
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 2022
+    targetPort: 2022
+    name: wings-sftp
     protocol: TCP
+  selector:
+    app: wings-sftp-external
+
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: wings-sftp-external
+  namespace: wings
+subsets:
+- addresses:
+  - ip: 69.62.95.160
+  ports:
+  - port: 2022
+    name: wings-sftp
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: wings-ingress
-  namespace: default
+  name: wings-api-ingress
+  namespace: wings
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: "0"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
     nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
-    nginx.ingress.kubernetes.io/cors-allow-origin: "https://panel.kevindev.com.br"
-    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS, PUT, DELETE, PATCH"
-    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,X-CSRF-TOKEN"
-    nginx.ingress.kubernetes.io/enable-cors: "true"
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/enable-cors: "false"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    external-dns.alpha.kubernetes.io/hostname: wings.kevindev.com.br
+    external-dns.alpha.kubernetes.io/ttl: "300"
 spec:
   ingressClassName: nginx
   tls:
   - hosts:
     - wings.kevindev.com.br
-    secretName: wings-tls-cert
+    secretName: wings-api-tls
   rules:
   - host: wings.kevindev.com.br
     http:
@@ -54,6 +88,47 @@ spec:
         pathType: Prefix
         backend:
           service:
-            name: wings-service
+            name: wings-api-external
             port:
               number: 8080
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wings-sftp-ingress
+  namespace: wings
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: "TCP"
+    nginx.ingress.kubernetes.io/tcp-services-configmap: "wings/wings-sftp-tcp"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    external-dns.alpha.kubernetes.io/hostname: sftp.kevindev.com.br
+    external-dns.alpha.kubernetes.io/ttl: "300"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - sftp.kevindev.com.br
+    secretName: wings-sftp-tls
+  rules:
+  - host: sftp.kevindev.com.br
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: wings-sftp-external
+            port:
+              number: 2022
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: wings-sftp-tcp
+  namespace: wings
+data:
+  "2022": "wings/wings-sftp-external:2022"
