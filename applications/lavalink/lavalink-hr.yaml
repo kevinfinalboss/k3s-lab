@@ -29,10 +29,7 @@ spec:
           port: 2333
         
         configMap:
-          enabled: true
-          name: lavalink-config
-          mountAsFile: false
-          mountPath: "/config"
+          enabled: false
         
         persistence:
           enabled: false
@@ -44,23 +41,27 @@ spec:
               - sh
               - -c
               - |
-                cp /config/application.yml /shared/application.yml
+                cp /configmap/application.yml /config/application.yml
                 echo "===== Configuração do Lavalink Atualizada ====="
-                cat /shared/application.yml | head -20
+                cat /config/application.yml | head -20
                 echo "=============================================="
             volumeMounts:
               - name: config-volume
+                mountPath: /configmap
+              - name: config-dir
                 mountPath: /config
-              - name: shared-config
-                mountPath: /shared
         
         volumes:
-          - name: shared-config
+          - name: config-volume
+            configMap:
+              name: lavalink-config
+          - name: config-dir
             emptyDir: {}
         
         volumeMounts:
-          - name: shared-config
-            mountPath: /opt/Lavalink
+          - name: config-dir
+            mountPath: /opt/Lavalink/application.yml
+            subPath: application.yml
         
         resources:
           limits:
