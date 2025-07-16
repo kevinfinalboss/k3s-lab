@@ -7,11 +7,10 @@ subsets:
 - addresses:
   - ip: 69.62.95.160
   ports:
-  - port: 8443
+  - port: 8080
     name: wings-api
   - port: 2022
     name: wings-sftp
-
 ---
 apiVersion: v1
 kind: Service
