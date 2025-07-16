@@ -6,8 +6,8 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/kevinfinalboss/k3s-lab.git
-    targetRevision: HEAD
+    repoURL: https://github.com/kevinfinalboss/Personal-Lab.git 
+    targetRevision: main
     path: charts/apps-templates
     helm:
       releaseName: lavalink
@@ -31,8 +31,8 @@ spec:
         configMap:
           enabled: true
           name: lavalink-config
-          mountAsFile: true
-          mountPath: "/opt/Lavalink"
+          mountAsFile: false
+          mountPath: "/config"
         
         persistence:
           enabled: false
@@ -44,15 +44,15 @@ spec:
               - sh
               - -c
               - |
-                cp /config/application.yml /opt/Lavalink/application.yml
+                cp /config/application.yml /shared/application.yml
                 echo "===== Configuração do Lavalink Atualizada ====="
-                cat /opt/Lavalink/application.yml | head -20
+                cat /shared/application.yml | head -20
                 echo "=============================================="
             volumeMounts:
               - name: config-volume
                 mountPath: /config
               - name: shared-config
-                mountPath: /opt/Lavalink
+                mountPath: /shared
         
         volumes:
           - name: shared-config
