@@ -24,8 +24,8 @@ data:
           - TVHTML5EMBEDDED
         oauth:
           enabled: true
-          skipInitialization: true
-          refreshToken: "${YOUTUBE_REFRESH_TOKEN}"
+          skipInitialization: false
+          refreshToken: ""
         pot:
           token: ""
           visitorData: ""
