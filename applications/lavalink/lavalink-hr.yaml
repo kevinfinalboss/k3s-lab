@@ -1,0 +1,110 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: lavalink
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/kevinfinalboss/Personal-Lab.git 
+    targetRevision: HEAD
+    path: charts/apps-templates
+    helm:
+      releaseName: lavalink
+      values: |
+        replicaCount: 1
+        
+        image:
+          repository: "registry.kevindev.com.br/lavalink"
+          tag: "4.1.1"
+          pullPolicy: Always
+        
+        imagePullSecrets:
+          - name: regcred
+        
+        containerPort: 2333
+        
+        service:
+          type: ClusterIP
+          port: 2333
+        
+        configMap:
+          enabled: false
+        
+        persistence:
+          enabled: false
+        
+        initContainers:
+          - name: config-init
+            image: busybox
+            command: 
+              - sh
+              - -c
+              - |
+                cp /configmap/application.yml /config/application.yml
+                echo "===== Configuração do Lavalink Atualizada ====="
+                cat /config/application.yml | head -20
+                echo "=============================================="
+            volumeMounts:
+              - name: config-volume
+                mountPath: /configmap
+              - name: config-dir
+                mountPath: /config
+        
+        volumes:
+          - name: config-volume
+            configMap:
+              name: lavalink-config
+          - name: config-dir
+            emptyDir: {}
+        
+        volumeMounts:
+          - name: config-dir
+            mountPath: /opt/Lavalink/application.yml
+            subPath: application.yml
+        
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1Gi
+          requests:
+            cpu: 500m
+            memory: 512Mi
+        
+        metrics:
+          enabled: false
+        
+        env:
+          - name: JAVA_OPTS
+            value: "-Xmx512m -Xms256m -Dcom.sun.management.jmxremote=false"
+        
+        ingress:
+          enabled: true
+          className: nginx
+          annotations:
+            nginx.ingress.kubernetes.io/ssl-redirect: "true"
+            nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+            cert-manager.io/cluster-issuer: letsencrypt-prod
+            external-dns.alpha.kubernetes.io/hostname: lavalink.kevindev.com.br
+            external-dns.alpha.kubernetes.io/ttl: "300"
+            nginx.ingress.kubernetes.io/proxy-body-size: "0"
+            nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+          hosts:
+            - host: lavalink.kevindev.com.br
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            - hosts:
+                - lavalink.kevindev.com.br
+              secretName: lavalink-tls-cert
+                  
+  destination:
+    server: https://kubernetes.default.svc 
+    namespace: lavalink 
+  syncPolicy:
+    automated:
+      prune: true 
+      selfHeal: true 
+    syncOptions:
+      - CreateNamespace=true
