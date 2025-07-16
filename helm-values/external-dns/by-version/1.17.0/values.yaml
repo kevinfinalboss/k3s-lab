@@ -1,0 +1,193 @@
+global:
+  imagePullSecrets: []
+
+image:
+  repository: registry.k8s.io/external-dns/external-dns
+  tag: ""
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+nameOverride: ""
+fullnameOverride: ""
+commonLabels: {}
+
+serviceAccount:
+  create: true
+  labels: {}
+  annotations: {}
+  name: ""
+  automountServiceAccountToken: true
+
+service:
+  annotations: {}
+  port: 7979
+  ipFamilies: []
+  ipFamilyPolicy: null
+
+rbac:
+  create: true
+  additionalPermissions: []
+
+deploymentAnnotations: {}
+extraContainers: {}
+
+deploymentStrategy:
+  type: Recreate
+
+revisionHistoryLimit: 10
+
+podLabels: {}
+podAnnotations: {}
+automountServiceAccountToken: true
+shareProcessNamespace: false
+
+podSecurityContext:
+  runAsNonRoot: true
+  fsGroup: 65534
+  seccompProfile:
+    type: RuntimeDefault
+
+priorityClassName: ""
+terminationGracePeriodSeconds: 30
+dnsPolicy: ""
+dnsConfig: {}
+initContainers: []
+
+securityContext:
+  privileged: false
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 65532
+  runAsGroup: 65532
+  capabilities:
+    drop: ["ALL"]
+
+env:
+  - name: CF_API_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: cloudflare-api-token
+        key: cloudflare_api_token
+
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 2
+  successThreshold: 1
+
+readinessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 6
+  successThreshold: 1
+
+extraVolumes: []
+extraVolumeMounts: []
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+nodeSelector: {}
+affinity: {}
+topologySpreadConstraints: []
+tolerations: []
+
+serviceMonitor:
+  enabled: false
+  additionalLabels: {}
+  annotations: {}
+  namespace: ""
+  interval: ""
+  scrapeTimeout: ""
+  scheme: ""
+  tlsConfig: {}
+  bearerTokenFile: ""
+  relabelings: []
+  metricRelabelings: []
+  targetLabels: []
+
+logLevel: info
+logFormat: text
+interval: 1m
+triggerLoopOnEvent: false
+namespaced: false
+gatewayNamespace: ""
+
+sources:
+  - service
+  - ingress
+
+policy: upsert-only
+registry: txt
+txtOwnerId: "kevindev.com.br"
+txtPrefix: "external-dns-"
+txtSuffix: ""
+
+domainFilters:
+  - "kevindev.com.br"
+  - "*.kevindev.com.br"
+
+excludeDomains: []
+labelFilter: ""
+managedRecordTypes: []
+
+provider:
+  name: cloudflare
+  webhook:
+    image:
+      repository: ""
+      tag: ""
+      pullPolicy: IfNotPresent
+    env: []
+    args: []
+    extraVolumeMounts: []
+    resources: {}
+    securityContext: {}
+    livenessProbe:
+      httpGet:
+        path: /healthz
+        port: http-webhook
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 2
+      successThreshold: 1
+    readinessProbe:
+      httpGet:
+        path: /healthz
+        port: http-webhook
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      timeoutSeconds: 5
+      failureThreshold: 6
+      successThreshold: 1
+    service:
+      port: 8080
+    serviceMonitor:
+      metricRelabelings: []
+      relabelings: []
+
+extraArgs: {}
+
+secretConfiguration:
+  enabled: false
+  mountPath: ""
+  subPath: ""
+  data: {}
+
+enabled: true
