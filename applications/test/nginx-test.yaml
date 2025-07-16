@@ -1,0 +1,214 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test-app
+  labels:
+    name: test-app
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-app
+  namespace: test-app
+  labels:
+    app: test-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-app
+  template:
+    metadata:
+      labels:
+        app: test-app
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.25-alpine
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
+        volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: html
+        configMap:
+          name: test-app-html
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-app-html
+  namespace: test-app
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>🚀 KevinDev Cluster</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+            }
+            
+            .container {
+                text-align: center;
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(20px);
+                border-radius: 20px;
+                padding: 60px 40px;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                max-width: 500px;
+                animation: fadeIn 1s ease-out;
+            }
+            
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(30px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            
+            .emoji {
+                font-size: 4rem;
+                margin-bottom: 20px;
+                display: block;
+                animation: bounce 2s infinite;
+            }
+            
+            @keyframes bounce {
+                0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+                40% { transform: translateY(-10px); }
+                60% { transform: translateY(-5px); }
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+                margin-bottom: 15px;
+                font-weight: 700;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            }
+            
+            .subtitle {
+                font-size: 1.2rem;
+                margin-bottom: 30px;
+                opacity: 0.9;
+                font-weight: 300;
+            }
+            
+            .success {
+                background: linear-gradient(45deg, #28a745, #20c997);
+                padding: 15px 30px;
+                border-radius: 25px;
+                font-size: 1.1rem;
+                font-weight: 600;
+                margin: 20px 0;
+                box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+            }
+            
+            .domain {
+                font-size: 1rem;
+                background: rgba(255, 255, 255, 0.2);
+                padding: 10px 20px;
+                border-radius: 15px;
+                margin-top: 25px;
+                font-family: 'Courier New', monospace;
+            }
+            
+            .footer {
+                margin-top: 30px;
+                font-size: 0.9rem;
+                opacity: 0.7;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <span class="emoji">🎉</span>
+            <h1>Cluster Online!</h1>
+            <p class="subtitle">K3s + NGINX + SSL funcionando perfeitamente</p>
+            
+            <div class="success">
+                ✅ Deploy realizado com sucesso
+            </div>
+            
+            <div class="domain">
+                test.kevindev.com.br
+            </div>
+            
+            <div class="footer">
+                Powered by KevinDev Infrastructure
+            </div>
+        </div>
+    </body>
+    </html>
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-app-service
+  namespace: test-app
+  labels:
+    app: test-app
+spec:
+  selector:
+    app: test-app
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+  type: ClusterIP
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test-app-ingress
+  namespace: test-app
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    external-dns.alpha.kubernetes.io/hostname: test.kevindev.com.br
+    external-dns.alpha.kubernetes.io/ttl: "300"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - test.kevindev.com.br
+    secretName: test-app-tls
+  rules:
+  - host: test.kevindev.com.br
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: test-app-service
+            port:
+              number: 80
