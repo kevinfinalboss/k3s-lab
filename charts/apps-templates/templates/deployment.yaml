@@ -4,6 +4,12 @@ metadata:
   name: {{ .Release.Name }}
   labels:
     {{- include "app.labels" . | nindent 4 }}
+  {{- if .Values.metrics.enabled }}
+  annotations:
+    prometheus.io/scrape: "{{ .Values.metrics.scrape }}"
+    prometheus.io/port: "{{ .Values.metrics.port }}"
+    prometheus.io/path: "{{ .Values.metrics.path }}"
+  {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -36,9 +42,11 @@ spec:
           ports:
             - containerPort: {{ . }}
               name: http
+              protocol: TCP
             {{- if $.Values.metrics.enabled }}
             - containerPort: {{ $.Values.metrics.port }}
               name: metrics
+              protocol: TCP
             {{- end }}
           {{- end }}
           {{- with .Values.env }}
@@ -51,6 +59,11 @@ spec:
             - configMapRef:
                 name: {{ .Values.configMap.name | default (printf "%s-config" .Release.Name) }}
           {{- end }}
+          {{- end }}
+          {{- if and .Values.externalSecrets.enabled .Values.externalSecrets.mountAsEnv }}
+          envFrom:
+            - secretRef:
+                name: {{ .Release.Name }}-secrets
           {{- end }}
           {{- if or .Values.configMap.mountAsFile (and .Values.externalSecrets.enabled .Values.externalSecrets.mountAsFile) .Values.persistence.enabled .Values.volumeMounts }}
           volumeMounts:
@@ -73,6 +86,14 @@ spec:
           {{- with .Values.resources }}
           resources:
             {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          {{- end }}
+          {{- if .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
           {{- end }}
       {{- if or .Values.configMap.mountAsFile (and .Values.externalSecrets.enabled .Values.externalSecrets.mountAsFile) .Values.persistence.enabled .Values.volumes }}
       volumes:
