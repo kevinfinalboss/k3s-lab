@@ -20,15 +20,20 @@ data:
           - MUSIC
           - WEB
           - ANDROID_MUSIC
-          - ANDROID_CREATOR
+          - TV
           - TVHTML5EMBEDDED
         oauth:
           enabled: true
+          skipInitialization: false
+          refreshToken: ""
+        pot:
+          token: ""
+          visitorData: ""
     lavalink:
       server:
         password: "youshallnotpass"
         sources:
-          youtube: true
+          youtube: false
           bandcamp: true
           soundcloud: true
           twitch: true
@@ -60,11 +65,11 @@ data:
         soundcloudSearchEnabled: true
         gc-warnings: true
       plugins:
-        - dependency: "dev.lavalink.youtube:youtube-plugin:1.13.2"
+        - dependency: "dev.lavalink.youtube:youtube-plugin:1.13.3"
           snapshot: false
     metrics:
       prometheus:
-        enabled: false
+        enabled: true
         endpoint: "/metrics"
     sentry:
       dsn: ""
