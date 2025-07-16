@@ -23,7 +23,7 @@ data:
           - ANDROID_CREATOR
           - TVHTML5EMBEDDED
         oauth:
-          enabled: false
+          enabled: true
     lavalink:
       server:
         password: "youshallnotpass"
