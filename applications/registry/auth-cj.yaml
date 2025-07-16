@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: registry-config-sa
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: registry-config-role
+rules:
+- apiGroups: [""]
+  resources: ["namespaces", "secrets", "serviceaccounts"]
+  verbs: ["get", "list", "create", "update", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: registry-config-binding
+subjects:
+- kind: ServiceAccount
+  name: registry-config-sa
+  namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: registry-config-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: registry-auth-setup
+  namespace: kube-system
+spec:
+  schedule: "0 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: registry-config-sa
+          containers:
+          - name: kubectl
+            image: bitnami/kubectl:latest
+            env:
+            - name: DOCKER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: registry-credentials
+                  key: password
+            command:
+            - /bin/bash
+            - -c
+            - |
+              echo "Obtendo lista de namespaces..."
+              NAMESPACES=$(kubectl get namespaces -o jsonpath='{.items[*].metadata.name}')
+              
+              DOCKER_SERVER="registry.kevindev.com.br"
+              DOCKER_USERNAME="kgomes-adm"
+              DOCKER_EMAIL="kevinmg50@gmail.com"
+              
+              for ns in $NAMESPACES; do
+                echo "Processando namespace: $ns"
+                
+                if [ "$ns" = "default" ]; then
+                  echo "Pulando namespace default (secret já existe)"
+                  continue
+                fi
+                
+                echo "Configurando registry secret no namespace: $ns"
+                kubectl create secret docker-registry regcred \
+                  --docker-server="$DOCKER_SERVER" \
+                  --docker-username="$DOCKER_USERNAME" \
+                  --docker-password="$DOCKER_PASSWORD" \
+                  --docker-email="$DOCKER_EMAIL" \
+                  --namespace="$ns" \
+                  --dry-run=client -o yaml | kubectl apply -f -
+                
+                if kubectl get serviceaccount default -n $ns &>/dev/null; then
+                  if ! kubectl get serviceaccount default -n $ns -o json | grep -q '"name": "regcred"'; then
+                    echo "Atualizando ServiceAccount default no namespace: $ns"
+                    kubectl patch serviceaccount default -n $ns -p '{"imagePullSecrets":[{"name":"regcred"}]}'
+                  else
+                    echo "ServiceAccount default já está configurada no namespace: $ns"
+                  fi
+                else
+                  echo "ServiceAccount default não encontrada no namespace: $ns"
+                fi
+              done
+              
+              echo "Configuração de registry concluída para todos os namespaces em: $(date)"
+          restartPolicy: OnFailure
