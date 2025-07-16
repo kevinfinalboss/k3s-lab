@@ -29,7 +29,10 @@ spec:
           port: 2333
         
         configMap:
-          enabled: false
+          enabled: true
+          name: lavalink-config
+          mountAsFile: true
+          mountPath: "/opt/Lavalink"
         
         persistence:
           enabled: false
@@ -41,27 +44,23 @@ spec:
               - sh
               - -c
               - |
-                cp /configmap/application.yml /config/application.yml
+                cp /config/application.yml /opt/Lavalink/application.yml
                 echo "===== Configuração do Lavalink Atualizada ====="
-                cat /config/application.yml | head -20
+                cat /opt/Lavalink/application.yml | head -20
                 echo "=============================================="
             volumeMounts:
               - name: config-volume
-                mountPath: /configmap
-              - name: config-dir
                 mountPath: /config
+              - name: shared-config
+                mountPath: /opt/Lavalink
         
         volumes:
-          - name: config-volume
-            configMap:
-              name: lavalink-config
-          - name: config-dir
+          - name: shared-config
             emptyDir: {}
         
         volumeMounts:
-          - name: config-dir
-            mountPath: /opt/Lavalink/application.yml
-            subPath: application.yml
+          - name: shared-config
+            mountPath: /opt/Lavalink
         
         resources:
           limits:
@@ -72,7 +71,10 @@ spec:
             memory: 512Mi
         
         metrics:
-          enabled: false
+          enabled: true
+          scrape: "true"
+          port: 2333
+          path: "/metrics"
         
         env:
           - name: JAVA_OPTS
