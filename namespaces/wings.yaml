@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: wings
+  labels:
+    name: wings
+    app.kubernetes.io/name: wings
+    app.kubernetes.io/component: container-wings
+    app.kubernetes.io/part-of: wings-system
+    app.kubernetes.io/managed-by: kubectl
+  annotations:
+    kubernetes.io/description: "Namespace for Docker wings service"
+    kubernetes.io/managed-by: "infrastructure-team"
