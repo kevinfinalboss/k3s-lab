@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/kevinfinalboss/Personal-Lab.git 
-    targetRevision: main
+    targetRevision: HEAD
     path: charts/apps-templates
     helm:
       releaseName: lavalink
