@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lavalink
+  labels:
+    name: lavalink
+    app.kubernetes.io/name: lavalink
+    app.kubernetes.io/component: container-lavalink
+    app.kubernetes.io/part-of: lavalink-system
+    app.kubernetes.io/managed-by: kubectl
+  annotations:
+    kubernetes.io/description: "Namespace for Docker lavalink service"
+    kubernetes.io/managed-by: "infrastructure-team"
