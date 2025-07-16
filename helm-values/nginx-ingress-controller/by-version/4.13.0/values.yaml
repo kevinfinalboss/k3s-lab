@@ -53,7 +53,17 @@ controller:
     https: 443
   # -- Global configuration passed to the ConfigMap consumed by the controller. Values may contain Helm templates.
   # Ref.: https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/
-  config: {}
+  config:
+    enable-real-ip: "true"
+    proxy-real-ip-cidr: "0.0.0.0/0"
+    use-forwarded-headers: "true"
+    resolver: "8.8.8.8 8.8.4.4 valid=30s"
+    resolver-timeout: "5s"
+    resolver-valid: "30s"
+    disable-ipv6-dns: "true"
+    worker-shutdown-timeout: "240s"
+    log-format-escape-json: "true"
+    log-format-upstream: '$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent" $request_length $request_time [$proxy_upstream_name] [$proxy_alternative_upstream_name] $upstream_addr $upstream_response_length $upstream_response_time $upstream_status $req_id'
   # -- Annotations to be added to the controller config configuration configmap.
   configAnnotations: {}
   # -- Will add custom headers before sending traffic to backends according to https://github.com/kubernetes/ingress-nginx/tree/main/docs/examples/customization/custom-headers
