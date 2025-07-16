@@ -1,0 +1,75 @@
+replicaCount: 1
+
+image:
+  repository: ""
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: regcred
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+containerPort: 80
+
+service:
+  type: ClusterIP
+  port: 80
+  nodePort: null
+
+ingress:
+  enabled: false
+  className: nginx
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+configMap:
+  enabled: false
+  name: ""
+  mountAsFile: false
+  mountPath: "/config"
+  data: {}
+
+persistence:
+  enabled: false
+  storageClass: ""
+  accessMode: ReadWriteMany
+  size: 1Gi
+  annotations: {}
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+env: []
+
+externalSecrets:
+  enabled: false
+  mountAsEnv: false
+  mountAsFile: false
+  parameters: []
+
+metrics:
+  enabled: true
+  scrape: "true"
+  port: 9090
+  path: "/metrics"
