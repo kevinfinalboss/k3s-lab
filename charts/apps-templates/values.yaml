@@ -56,11 +56,21 @@ resources:
     cpu: 100m
     memory: 128Mi
 
+livenessProbe: {}
+
+readinessProbe: {}
+
 nodeSelector: {}
 tolerations: []
 affinity: {}
 
 env: []
+
+initContainers: []
+
+volumes: []
+
+volumeMounts: []
 
 externalSecrets:
   enabled: false
