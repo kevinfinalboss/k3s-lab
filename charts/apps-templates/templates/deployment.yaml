@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    {{- include "app.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "app.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "app.labels" . | nindent 8 }}
+      {{- if .Values.metrics.enabled }}
+      annotations:
+        prometheus.io/scrape: "{{ .Values.metrics.scrape }}"
+        prometheus.io/port: "{{ .Values.metrics.port }}"
+        prometheus.io/path: "{{ .Values.metrics.path }}"
+      {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.initContainers }}
+      initContainers:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Release.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.containerPort }}
+          ports:
+            - containerPort: {{ . }}
+              name: http
+            {{- if $.Values.metrics.enabled }}
+            - containerPort: {{ $.Values.metrics.port }}
+              name: metrics
+            {{- end }}
+          {{- end }}
+          {{- with .Values.env }}
+          env:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.configMap.enabled }}
+          {{- if not .Values.configMap.mountAsFile }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.configMap.name | default (printf "%s-config" .Release.Name) }}
+          {{- end }}
+          {{- end }}
+          {{- if or .Values.configMap.mountAsFile (and .Values.externalSecrets.enabled .Values.externalSecrets.mountAsFile) .Values.persistence.enabled .Values.volumeMounts }}
+          volumeMounts:
+            {{- if .Values.configMap.mountAsFile }}
+            - name: config-volume
+              mountPath: {{ .Values.configMap.mountPath }}
+            {{- end }}
+            {{- if and .Values.externalSecrets.enabled .Values.externalSecrets.mountAsFile }}
+            - name: secrets-volume
+              mountPath: "/secrets"
+            {{- end }}
+            {{- if .Values.persistence.enabled }}
+            - name: data
+              mountPath: /data
+            {{- end }}
+            {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- if or .Values.configMap.mountAsFile (and .Values.externalSecrets.enabled .Values.externalSecrets.mountAsFile) .Values.persistence.enabled .Values.volumes }}
+      volumes:
+        {{- if .Values.configMap.mountAsFile }}
+        - name: config-volume
+          configMap:
+            name: {{ .Values.configMap.name | default (printf "%s-config" .Release.Name) }}
+        {{- end }}
+        {{- if and .Values.externalSecrets.enabled .Values.externalSecrets.mountAsFile }}
+        - name: secrets-volume
+          secret:
+            secretName: {{ .Release.Name }}-secrets
+        {{- end }}
+        {{- if .Values.persistence.enabled }}
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-pvc
+        {{- end }}
+        {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
