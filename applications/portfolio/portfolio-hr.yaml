@@ -16,7 +16,7 @@ spec:
         
         image:
           repository: "registry.kevindev.com.br/kevin-portfolio"
-          tag: "1.0.0"
+          tag: "1.0.3"
           pullPolicy: Always
         
         imagePullSecrets:
