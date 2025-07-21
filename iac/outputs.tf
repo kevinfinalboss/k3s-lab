@@ -94,6 +94,58 @@ output "nfs_path" {
   value       = module.csi_driver_nfs.nfs_path
 }
 
+# Redis
+output "redis_namespace" {
+  description = "Namespace do Redis"
+  value       = module.redis.namespace
+}
+
+output "redis_chart_version" {
+  description = "Versão do chart Redis instalada"
+  value       = module.redis.chart_version
+}
+
+output "redis_service_name" {
+  description = "Nome do service do Redis"
+  value       = module.redis.service_name
+}
+
+output "redis_connection_string" {
+  description = "String de conexão do Redis"
+  value       = module.redis.connection_string
+}
+
+# MariaDB
+output "mariadb_namespace" {
+  description = "Namespace do MariaDB"
+  value       = module.mariadb.namespace
+}
+
+output "mariadb_chart_version" {
+  description = "Versão do chart MariaDB instalada"
+  value       = module.mariadb.chart_version
+}
+
+output "mariadb_service_name" {
+  description = "Nome do service do MariaDB"
+  value       = module.mariadb.service_name
+}
+
+output "mariadb_connection_string" {
+  description = "String de conexão do MariaDB"
+  value       = module.mariadb.connection_string
+}
+
+output "mariadb_database_name" {
+  description = "Nome do banco de dados criado"
+  value       = module.mariadb.database_name
+}
+
+output "mariadb_database_user" {
+  description = "Usuário do banco de dados"
+  value       = module.mariadb.database_user
+}
+
 # Summary
 output "cluster_summary" {
   description = "Resumo da infraestrutura do cluster"
@@ -124,6 +176,18 @@ output "cluster_summary" {
       version    = module.csi_driver_nfs.chart_version
       nfs_server = module.csi_driver_nfs.nfs_server
       nfs_path   = module.csi_driver_nfs.nfs_path
+    }
+    redis = {
+      namespace         = module.redis.namespace
+      version          = module.redis.chart_version
+      service_name     = module.redis.service_name
+      connection_string = module.redis.connection_string
+    }
+    mariadb = {
+      namespace         = module.mariadb.namespace
+      version          = module.mariadb.chart_version
+      service_name     = module.mariadb.service_name
+      connection_string = module.mariadb.connection_string
     }
   }
 }
