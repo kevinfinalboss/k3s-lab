@@ -65,8 +65,19 @@ spec:
             cert-manager.io/cluster-issuer: letsencrypt-prod
             external-dns.alpha.kubernetes.io/hostname: portfolio.kevindev.com.br
             external-dns.alpha.kubernetes.io/ttl: "300"
-            nginx.ingress.kubernetes.io/proxy-body-size: "0"
-            nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+            nginx.ingress.kubernetes.io/server-snippet: |
+              location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
+                expires 1y;
+                add_header Cache-Control "public, immutable";
+              }
+              
+              location / {
+                try_files $uri $uri/ @rewrites;
+              }
+              
+              location @rewrites {
+                rewrite ^(.+)$ /index.html last;
+              }
           hosts:
             - host: portfolio.kevindev.com.br
               paths:
