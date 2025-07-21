@@ -60,3 +60,18 @@ module "csi_driver_nfs" {
   nfs_server    = var.nfs_server
   nfs_path      = var.nfs_path
 }
+
+module "redis" {
+  source = "./modules/redis"
+
+  namespace           = var.redis_namespace
+  chart_version       = var.redis_chart_version
+  redis_password      = var.redis_password
+  master_storage_size = var.redis_master_storage_size
+}
+
+module "mariadb" {
+  source = "./modules/mariadb"
+  namespace             = var.mariadb_namespace
+  chart_version        = var.mariadb_chart_version
+}
