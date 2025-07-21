@@ -63,18 +63,18 @@ spec:
             nginx.ingress.kubernetes.io/ssl-redirect: "true"
             nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
             cert-manager.io/cluster-issuer: letsencrypt-prod
-            external-dns.alpha.kubernetes.io/hostname: kevindev.com.br
+            external-dns.alpha.kubernetes.io/hostname: portfolio.kevindev.com.br
             external-dns.alpha.kubernetes.io/ttl: "300"
             nginx.ingress.kubernetes.io/proxy-body-size: "0"
             nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
           hosts:
-            - host: kevindev.com.br
+            - host: portfolio.kevindev.com.br
               paths:
                 - path: /
                   pathType: Prefix
           tls:
             - hosts:
-                - kevindev.com.br
+                - portfolio.kevindev.com.br
               secretName: portfolio-tls-cert
                   
   destination:
