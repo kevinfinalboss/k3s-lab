@@ -34,7 +34,7 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ $.Release.Name }}-service
+                name: {{ $.Release.Name }}
                 port:
                   number: {{ $.Values.service.port }}
           {{- end }}
