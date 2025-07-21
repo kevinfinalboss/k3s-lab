@@ -130,3 +130,74 @@ variable "nfs_path" {
   type        = string
   default     = "/srv/nfs-storage"
 }
+
+# Redis
+variable "redis_namespace" {
+  description = "Namespace para o Redis"
+  type        = string
+  default     = "redis"
+}
+
+variable "redis_chart_version" {
+  description = "Versão do chart do Redis"
+  type        = string
+  default     = "21.2.12"
+}
+
+variable "redis_password" {
+  description = "Password do Redis"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "redis_master_storage_size" {
+  description = "Tamanho do storage do Redis master"
+  type        = string
+  default     = "8Gi"
+}
+
+# MariaDB variables
+variable "mariadb_namespace" {
+  description = "Namespace para o MariaDB"
+  type        = string
+  default     = "mariadb"
+}
+
+variable "mariadb_chart_version" {
+  description = "Versão do chart do MariaDB"
+  type        = string
+  default     = "21.0.2"
+}
+
+variable "mariadb_root_password" {
+  description = "Password root do MariaDB"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "mariadb_database_name" {
+  description = "Nome do banco de dados a ser criado"
+  type        = string
+  default     = "test_db"
+}
+
+variable "mariadb_database_user" {
+  description = "Usuário do banco de dados"
+  type        = string
+  default     = "test_user"
+}
+
+variable "mariadb_database_password" {
+  description = "Password do usuário do banco de dados"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "mariadb_primary_storage_size" {
+  description = "Tamanho do storage do MariaDB primary"
+  type        = string
+  default     = "20Gi"
+}
