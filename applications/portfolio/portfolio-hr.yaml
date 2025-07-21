@@ -1,0 +1,88 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kevin-portfolio
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/kevinfinalboss/k3s-lab.git
+    targetRevision: HEAD
+    path: charts/apps-templates
+    helm:
+      releaseName: kevin-portfolio
+      values: |
+        replicaCount: 1
+        
+        image:
+          repository: "registry.kevindev.com.br/kevin-portfolio"
+          tag: "1.0.0"
+          pullPolicy: Always
+        
+        imagePullSecrets:
+          - name: regcred
+        
+        containerPort: 3000
+        
+        service:
+          type: ClusterIP
+          port: 3000
+        
+        configMap:
+          enabled: false
+        
+        persistence:
+          enabled: false
+        
+        externalSecrets:
+          enabled: false
+        
+        initContainers: []
+        
+        volumes: []
+        
+        volumeMounts: []
+        
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+        
+        metrics:
+          enabled: false
+        
+        env: []
+        
+        ingress:
+          enabled: true
+          className: nginx
+          annotations:
+            nginx.ingress.kubernetes.io/ssl-redirect: "true"
+            nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+            cert-manager.io/cluster-issuer: letsencrypt-prod
+            external-dns.alpha.kubernetes.io/hostname: kevindev.com.br
+            external-dns.alpha.kubernetes.io/ttl: "300"
+            nginx.ingress.kubernetes.io/proxy-body-size: "0"
+            nginx.ingress.kubernetes.io/proxy-buffer-size: "128k"
+          hosts:
+            - host: kevindev.com.br
+              paths:
+                - path: /
+                  pathType: Prefix
+          tls:
+            - hosts:
+                - kevindev.com.br
+              secretName: portfolio-tls-cert
+                  
+  destination:
+    server: https://kubernetes.default.svc 
+    namespace: portfolio 
+  syncPolicy:
+    automated:
+      prune: true 
+      selfHeal: true 
+    syncOptions:
+      - CreateNamespace=true
