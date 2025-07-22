@@ -201,3 +201,22 @@ variable "mariadb_primary_storage_size" {
   type        = string
   default     = "20Gi"
 }
+
+# Prometheus
+variable "prometheus_namespace" {
+  description = "Namespace para o Prometheus"
+  type        = string
+  default     = "monitoring"
+}
+
+variable "prometheus_chart_version" {
+  description = "Versão do chart do Prometheus"
+  type        = string
+  default     = "27.28.0"
+}
+
+variable "prometheus_storage_size" {
+  description = "Tamanho do storage para o Prometheus"
+  type        = string
+  default     = "20Gi"
+}
