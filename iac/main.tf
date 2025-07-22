@@ -75,3 +75,17 @@ module "mariadb" {
   namespace             = var.mariadb_namespace
   chart_version        = var.mariadb_chart_version
 }
+
+module "prometheus" {
+  source = "./modules/prometheus"
+
+  namespace     = var.prometheus_namespace
+  chart_version = var.prometheus_chart_version
+  storage_size  = var.prometheus_storage_size
+  
+  depends_on = [
+    module.nginx_ingress_controller,
+    module.cert_manager,
+    module.external_dns
+  ]
+}
