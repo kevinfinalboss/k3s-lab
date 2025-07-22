@@ -10,7 +10,7 @@ resource "kubernetes_secret" "basic_auth" {
   }
 
   data = {
-    auth = base64encode(data.aws_ssm_parameter.htpasswd.value)
+    auth = data.aws_ssm_parameter.htpasswd.value
   }
 
   type = "Opaque"
@@ -30,4 +30,6 @@ resource "helm_release" "prometheus" {
   ]
 
   timeout = 600
+
+  depends_on = [kubernetes_secret.basic_auth]
 }
