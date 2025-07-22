@@ -1,0 +1,74 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: pterodactyl
+  labels:
+    name: pterodactyl
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pterodactyl-external
+  namespace: pterodactyl
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: pterodactyl-external
+  namespace: pterodactyl
+subsets:
+  - addresses:
+      - ip: 69.62.95.160
+    ports:
+      - port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pterodactyl-ingress
+  namespace: pterodactyl
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    external-dns.alpha.kubernetes.io/hostname: panel.kevindev.com.br
+    external-dns.alpha.kubernetes.io/ttl: "300"
+    nginx.ingress.kubernetes.io/proxy-pass-headers: "Host"
+    nginx.ingress.kubernetes.io/proxy-set-headers: "pterodactyl/pterodactyl-headers"
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - panel.kevindev.com.br
+    secretName: pterodactyl-tls
+  rules:
+  - host: panel.kevindev.com.br
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: pterodactyl-external
+            port:
+              number: 8080
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pterodactyl-headers
+  namespace: pterodactyl
+data:
+  Host: "panel.kevindev.com.br"
+  X-Real-IP: "$remote_addr"
+  X-Forwarded-For: "$proxy_add_x_forwarded_for"
+  X-Forwarded-Proto: "$scheme"
