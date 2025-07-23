@@ -89,3 +89,17 @@ module "prometheus" {
     module.external_dns
   ]
 }
+
+module "grafana" {
+  source = "./modules/grafana"
+
+  namespace     = var.grafana_namespace
+  chart_version = var.grafana_chart_version
+  
+  depends_on = [
+    module.nginx_ingress_controller,
+    module.cert_manager,
+    module.external_dns,
+    module.prometheus
+  ]
+}
