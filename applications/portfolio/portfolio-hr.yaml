@@ -65,10 +65,6 @@ spec:
             cert-manager.io/cluster-issuer: letsencrypt-prod
             external-dns.alpha.kubernetes.io/hostname: portfolio.kevindev.com.br
             external-dns.alpha.kubernetes.io/ttl: "300"
-            nginx.ingress.kubernetes.io/configuration-snippet: |
-              expires 1y;
-              add_header Cache-Control "public, immutable";
-              try_files $uri $uri/ /index.html;
           hosts:
             - host: portfolio.kevindev.com.br
               paths:
