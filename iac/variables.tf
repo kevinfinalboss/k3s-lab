@@ -220,3 +220,15 @@ variable "prometheus_storage_size" {
   type        = string
   default     = "20Gi"
 }
+
+variable "grafana_namespace" {
+  description = "Namespace para o Grafana"
+  type        = string
+  default     = "monitoring"
+}
+
+variable "grafana_chart_version" {
+  description = "Versão do chart Helm do Grafana"
+  type        = string
+  default     = "9.2.10"
+}
