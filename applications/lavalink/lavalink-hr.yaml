@@ -52,11 +52,11 @@ spec:
               - -c
               - |
                 cp /configmap/application.yml /config/application.yml
-                sed -i "s|\${LAVALINK_PASSWORD}|$lavalink_password|g" /config/application.yml
-                sed -i "s|\${YOUTUBE_REFRESH_TOKEN}|$youtube_refresh_token|g" /config/application.yml
+                sed -i "s|\${LAVALINK_PASSWORD}|${lavalink_password}|g" /config/application.yml
+                sed -i "s|\${YOUTUBE_REFRESH_TOKEN}|${youtube_refresh_token}|g" /config/application.yml
                 echo "===== Configuração do Lavalink Atualizada ====="
-                echo "Password configurado: $(echo $lavalink_password | cut -c1-5)***"
-                echo "Refresh token configurado: $(echo $youtube_refresh_token | cut -c1-10)***"
+                echo "Password configurado: $(echo ${lavalink_password} | cut -c1-5)***"
+                echo "Refresh token configurado: $(echo ${youtube_refresh_token} | cut -c1-10)***"
                 echo "OAuth configurado com skipInitialization: true"
                 echo "=============================================="
             envFrom:
