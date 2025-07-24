@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: bot
+  labels:
+    name: bot
+    app.kubernetes.io/name: bot
+    app.kubernetes.io/component: container-bot
+    app.kubernetes.io/part-of: bot-system
+    app.kubernetes.io/managed-by: kubectl
+  annotations:
+    kubernetes.io/description: "Namespace for Docker bot service"
+    kubernetes.io/managed-by: "infrastructure-team"
