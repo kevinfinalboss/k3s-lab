@@ -69,7 +69,7 @@ spec:
               path: /mibot/db-name
         
         serviceAccount:
-          create: true
+          create: false
           name: "mibot-service-account"
         
         resources:
