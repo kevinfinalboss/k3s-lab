@@ -46,7 +46,7 @@ spec:
         
         initContainers:
           - name: config-init
-            image: alpine:latest
+            image: registry.kevindev.com.br/alpine:latest
             command: 
               - sh
               - -c
