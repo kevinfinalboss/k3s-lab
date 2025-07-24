@@ -28,9 +28,11 @@ spec:
       labels:
         app: registry
     spec:
+      imagePullSecrets:
+      - name: regcred
       containers:
       - name: registry
-        image: registry:2
+        image: 503935937141.dkr.ecr.us-east-1.amazonaws.com/registry:2
         ports:
         - containerPort: 5000
         env:
