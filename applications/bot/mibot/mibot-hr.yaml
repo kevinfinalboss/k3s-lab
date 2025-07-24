@@ -1,0 +1,97 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mibot
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/kevinfinalboss/k3s-lab.git
+    targetRevision: HEAD
+    path: charts/apps-templates
+    helm:
+      releaseName: mibot
+      values: |
+        replicaCount: 1
+        
+        image:
+          repository: "registry.kevindev.com.br/mibot"
+          tag: "latest"
+          pullPolicy: Always
+        
+        imagePullSecrets:
+          - name: regcred
+        
+        containerPort: 3000
+        
+        service:
+          type: ClusterIP
+          port: 3000
+        
+        configMap:
+          enabled: false
+        
+        persistence:
+          enabled: false
+        
+        externalSecrets:
+          enabled: true
+          mountAsEnv: true
+          mountAsFile: false
+          parameters:
+            - key: BOT_TOKEN
+              path: /mibot/bot-token
+            - key: OWNER_ID_1
+              path: /mibot/owner-id-1
+            - key: LAVALINK_NODE_1_HOST
+              path: /mibot/lavalink-node-1-host
+            - key: LAVALINK_NODE_1_PORT
+              path: /mibot/lavalink-node-1-port
+            - key: LAVALINK_NODE_1_PASSWORD
+              path: /mibot/lavalink-node-1-password
+            - key: CF_ZONE_ID
+              path: /mibot/cf-zone-id
+            - key: CF_API_TOKEN
+              path: /mibot/cf-api-token
+            - key: PTERODACTYL_URL
+              path: /mibot/pterodactyl-url
+            - key: PTERODACTYL_APIKEY
+              path: /mibot/pterodactyl-apikey
+            - key: K8S_IN_CLUSTER
+              path: /mibot/k8s-in-cluster
+            - key: DB_HOST
+              path: /mibot/db-host
+            - key: DB_PORT
+              path: /mibot/db-port
+            - key: DB_USERNAME
+              path: /mibot/db-username
+            - key: DB_PASSWORD
+              path: /mibot/db-password
+            - key: DB_NAME
+              path: /mibot/db-name
+        
+        serviceAccount:
+          create: true
+          name: "mibot-service-account"
+        
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 250m
+            memory: 256Mi
+        
+        env:
+          - name: NODE_ENV
+            value: "production"
+                  
+  destination:
+    server: https://kubernetes.default.svc 
+    namespace: bot 
+  syncPolicy:
+    automated:
+      prune: true 
+      selfHeal: true 
+    syncOptions:
+      - CreateNamespace=true
