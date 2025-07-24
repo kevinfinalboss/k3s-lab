@@ -57,8 +57,6 @@ spec:
               path: /mibot/pterodactyl-url
             - key: PTERODACTYL_APIKEY
               path: /mibot/pterodactyl-apikey
-            - key: K8S_IN_CLUSTER
-              path: /mibot/k8s-in-cluster
             - key: DB_HOST
               path: /mibot/db-host
             - key: DB_PORT
@@ -85,6 +83,8 @@ spec:
         env:
           - name: NODE_ENV
             value: "production"
+          - name: K8S_IN_CLUSTER
+            value: "true"
                   
   destination:
     server: https://kubernetes.default.svc 
