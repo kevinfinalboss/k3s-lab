@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: 503935937141.dkr.ecr.us-east-1.amazonaws.com/nginx:1.25-alpine
+        image: registry.kevindev.com.br/nginx:1.25-alpine
         ports:
         - containerPort: 80
         resources:
