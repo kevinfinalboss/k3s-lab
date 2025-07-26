@@ -97,11 +97,11 @@ livenessProbe:
 
 image:
   # -- The Docker registry
-  registry: docker.io
+  registry: registry.kevindev.com.br
   # -- Docker image repository
   repository: grafana/grafana
   # Overrides the Grafana image tag whose default is the chart appVersion
-  tag: "12.0.2"
+  tag: "12.0.212.0.2"
   sha: ""
   pullPolicy: IfNotPresent
 
