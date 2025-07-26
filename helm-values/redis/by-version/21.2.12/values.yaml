@@ -112,8 +112,8 @@ diagnosticMode:
 ## @param image.debug Enable image debug mode
 ##
 image:
-  registry: docker.io
-  repository: bitnami/redis
+  registry: registry.kevindev.com.br
+  repository: redis
   tag: 8.0.3-debian-12-r1
   digest: ""
   ## Specify a imagePullPolicy
