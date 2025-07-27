@@ -98,7 +98,7 @@ serviceBindings:
 ## @param image.debug Specify if debug logs should be enabled
 ##
 image:
-  registry: docker.io
+  registry: registry.kevindev.com.br
   repository: bitnami/mariadb
   tag: 11.8.2-debian-12-r3
   digest: ""
