@@ -15,7 +15,7 @@ spec:
         replicaCount: 1
         
         image:
-          repository: "fredboat/lavalink"
+          repository: "registry.kevindev.com.br/fredboat/lavalink"
           tag: "4.1.1"
           pullPolicy: Always
         
