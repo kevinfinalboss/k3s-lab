@@ -24,7 +24,7 @@ data:
           - TVHTML5EMBEDDED
         oauth:
           enabled: true
-          skipInitialization: true
+          skipInitialization: false
           refreshToken: "${YOUTUBE_REFRESH_TOKEN}"
         pot:
           token: ""
@@ -65,7 +65,7 @@ data:
         soundcloudSearchEnabled: true
         gc-warnings: true
       plugins:
-        - dependency: "dev.lavalink.youtube:youtube-plugin:1.13.3"
+        - dependency: "dev.lavalink.youtube:youtube-plugin:1.13.4"
           snapshot: false
     metrics:
       prometheus:
