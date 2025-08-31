@@ -20,37 +20,6 @@ subsets:
       - ip: 69.62.95.160
     ports:
       - port: 8080
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: pterodactyl-ingress
-  namespace: pterodactyl
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    external-dns.alpha.kubernetes.io/hostname: panel.kevindev.com.br
-    external-dns.alpha.kubernetes.io/ttl: "300"
-    nginx.ingress.kubernetes.io/proxy-pass-headers: "Host"
-    nginx.ingress.kubernetes.io/proxy-set-headers: "pterodactyl/pterodactyl-headers"
-spec:
-  ingressClassName: nginx
-  tls:
-  - hosts:
-    - panel.kevindev.com.br
-    secretName: pterodactyl-tls
-  rules:
-  - host: panel.kevindev.com.br
-    http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: pterodactyl-external
-            port:
-              number: 8080
 
 ---
 apiVersion: v1
@@ -63,3 +32,47 @@ data:
   X-Real-IP: "$remote_addr"
   X-Forwarded-For: "$proxy_add_x_forwarded_for"
   X-Forwarded-Proto: "$scheme"
+  X-Forwarded-Host: "$host"
+  X-Forwarded-Port: "$server_port"
+  X-Forwarded-Prefix: ""
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: pterodactyl-ingress
+  namespace: pterodactyl
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    external-dns.alpha.kubernetes.io/hostname: panel.kevindev.com.br
+    external-dns.alpha.kubernetes.io/ttl: "300"
+    nginx.ingress.kubernetes.io/proxy-set-headers: "pterodactyl/pterodactyl-headers"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"
+    nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+    nginx.ingress.kubernetes.io/client-max-body-size: "100m"
+    nginx.ingress.kubernetes.io/proxy-body-size: "100m"
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  tls:
+  - hosts:
+    - panel.kevindev.com.br
+    secretName: pterodactyl-tls
+  rules:
+  - host: panel.kevindev.com.br
+    http:
+      paths:
+      - path: /()(.*)
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: pterodactyl-external
+            port:
+              number: 8080
