@@ -9,7 +9,7 @@ spec:
     server: https://kubernetes.default.svc
     namespace: jellyfin
   source:
-    repoURL: 'https://seu-repositorio-git-url.git'
+    repoURL: https://github.com/kevinfinalboss/k3s-lab.git
     targetRevision: HEAD
     path: infrastructure/helm-values/jellyfin/by-version/2.3.0/charts/jellyfin
     helm:
