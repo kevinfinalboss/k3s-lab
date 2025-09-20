@@ -1,0 +1,88 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prowlarr
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: jellyfin
+  source:
+    repoURL: https://k8s-at-home.com/charts/
+    chart: prowlarr
+    targetRevision: "4.5.2"
+    helm:
+      values: |-
+        image:
+          repository: lscr.io/linuxserver/prowlarr
+          tag: latest
+          pullPolicy: IfNotPresent
+
+        env:
+          TZ: America/Sao_Paulo
+          PUID: "1000"
+          PGID: "1000"
+
+        service:
+          main:
+            ports:
+              http:
+                port: 9696
+
+        ingress:
+          main:
+            enabled: true
+            ingressClassName: nginx
+            annotations:
+              nginx.ingress.kubernetes.io/ssl-redirect: "true"
+              nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+              cert-manager.io/cluster-issuer: letsencrypt-prod
+              external-dns.alpha.kubernetes.io/hostname: prowlarr.kevindev.com.br
+              external-dns.alpha.kubernetes.io/ttl: "300"
+            hosts:
+              - host: prowlarr.kevindev.com.br
+                paths:
+                  - path: /
+                    pathType: Prefix
+            tls:
+              - hosts:
+                  - prowlarr.kevindev.com.br
+                secretName: prowlarr-tls-cert
+
+        persistence:
+          config:
+            enabled: true
+            type: pvc
+            accessMode: ReadWriteOnce
+            size: 1Gi
+            retain: true
+
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+
+        probes:
+          liveness:
+            enabled: true
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readiness:
+            enabled: true
+            initialDelaySeconds: 30
+            periodSeconds: 30
+
+        nodeSelector: {}
+        tolerations: []
+        affinity: {}
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
