@@ -7,7 +7,7 @@ spec:
   project: default
   destination:
     server: https://kubernetes.default.svc
-    namespace: radarr
+    namespace: jellyfin
   source:
     repoURL: https://k8s-at-home.com/charts/
     chart: radarr
